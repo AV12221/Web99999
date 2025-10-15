@@ -68,7 +68,7 @@
 		<link rel="stylesheet" href="style/rrssb.css"/>
 		<script data-ad-client="ca-pub-9107422120987163" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 	</head>
-	<body>
+	<body><div class="game-wrapper">
 		<canvas id="canvas"></canvas>
 		<div id="overlay" class="faded overlay"></div>
 		<div id='startBtn' ></div>
@@ -166,7 +166,7 @@
     <a href="leaderboard.html" style="padding:10px 14px;border-radius:10px;background:#2563eb;color:#fff;text-decoration:none">查看排行榜</a>
   </div>
 	<script type="module" src="./rank.js"></script>
-</body>
+</div></body
 </html>
 <!-- World SDK buttons -->
 <style>
@@ -175,8 +175,8 @@
 #btnPay[disabled]{opacity:.6}
 </style>
 <div id="worldBar">
-  <button id="btnLogin" onclick="worldLogin()">登录</button>
-  <button id="btnPay" onclick="worldPay()">支付 USDC 0.10</button>
+  <button id="btnLogin" class="btn ghost" onclick="worldLogin()">登录</button>
+  <button id="btnPay" class="btn" onclick="worldPay()">支付 USDC 0.10</button>
 </div>
 <script type="module" src="./world.js"></script>
 <!-- World HUD / Buttons / Toast -->
@@ -192,7 +192,7 @@
 <div id="hud">玩家：<span id="playerName">游客</span> ｜ 余额：<span id="balance">—</span></div>
 <div id="toast"></div>
 <div id="worldBar">
-  <button id="btnLogin" onclick="worldLogin()">登录</button>
-  <button id="btnPay"   onclick="worldPay()">支付 USDC 0.10</button>
+  <button id="btnLogin" class="btn ghost" onclick="worldLogin()">登录</button>
+  <button id="btnPay" class="btn"   onclick="worldPay()">支付 USDC 0.10</button>
 </div>
 <script type="module" src="./world.js"></script>

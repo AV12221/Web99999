@@ -33,3 +33,18 @@ async function worldPay() {
 }
 window.worldLogin = worldLogin
 window.worldPay = worldPay
+
+// UI helpers
+const $ = (s)=>document.querySelector(s)
+
+function setPayEnabled(v){ const b=$('#btnPay'); if(b) b.disabled=!v }
+function setLoginDone(){
+  const b=$('#btnLogin'); if(!b) return
+  b.textContent='已登录'; b.disabled=true
+  b.classList.remove('ghost')
+}
+
+document.addEventListener('world:login', ()=>{ setLoginDone(); setPayEnabled(true) })
+
+// 首次进入时禁用支付，等登录事件开启
+setPayEnabled(false)
