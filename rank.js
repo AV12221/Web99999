@@ -1,26 +1,23 @@
-import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js'
-const url  = window.SUPABASE_URL
-const key  = window.SUPABASE_ANON_KEY
-export const sb = createClient(url, key)
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js'
 
-// 登录后把地址保存到全局
-window.playerAddr = ''
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-// 支持：saveScore(addr,score)
-export async function saveScore(address, score){
-  try{
-    const { error } = await sb.from('scores').insert({ address, score })
-    if(error) { console.error('saveScore error', error); alert('分数保存失败'); return false }
-    console.log('score saved', {address,score}); return true
-  }catch(e){ console.error(e); return false }
+/** 保存分数 */
+export async function saveScore(player, score){
+  const p = String(player||'guest').slice(0,24)
+  const s = Math.max(0, Number(score)||0)
+  const { error } = await sb.from('scores').insert({ player:p, score:s })
+  if(error) console.error('saveScore error:', error)
 }
 
-// 监听“支付成功”给奖励分
-window.addEventListener('world:paid', async ev=>{
-  const add = ev.detail?.reward || 50
-  if(typeof window.updateScore === 'function'){
-    window.updateScore((window.score||0)+add)
-  }
-})
-window.saveScore = saveScore;
-window.onGameOverScore = (s)=> saveScore(window.playerAddr || 'guest', s ?? (window.score||0) );
+/** 取前 n 名 */
+export async function getTop(n=10){
+  const { data, error } = await sb
+    .from('scores')
+    .select('player,score,created_at')
+    .order('score', { ascending:false })
+    .limit(n)
+  if(error){ console.error(error); return [] }
+  return data||[]
+}
