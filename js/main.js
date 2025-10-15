@@ -380,3 +380,57 @@ function showHelp() {
 	script.src = 'http://hextris.io/a.js';
 	document.head.appendChild(script);
 })()
+
+// 监听 World 支付成功，奖励分数
+window.addEventListener('world:paid', (ev) => {
+  const add = ev.detail?.reward || 50
+
+  // 1) 若有全局 addScore / updateScore
+  if (typeof window.addScore === 'function') { window.addScore(add); return }
+  if (typeof window.updateScore === 'function') { window.updateScore((window.score||0)+add); return }
+
+  // 2) 常见：存在 window.score 与渲染函数 renderScore
+  if (typeof window.score !== 'undefined') {
+    window.score = (window.score|0) + add
+    if (typeof window.renderScore === 'function') window.renderScore()
+    return
+  }
+
+  // 3) 兜底：直接改页面分数 DOM（Hextris 顶部的分数通常有 #score 或 .score）
+  const el = document.querySelector('#score, .score, .highscore, .current-score')
+  if (el) el.textContent = String((parseInt(el.textContent||'0',10) || 0) + add)
+})
+
+// 监听 World 支付成功事件，奖励分数
+window.addEventListener('world:paid', (ev) => {
+  const add = ev.detail?.reward || 50
+
+  // 1) 全局函数
+  if (typeof window.addScore === 'function') { window.addScore(add); return }
+  if (typeof window.updateScore === 'function') { window.updateScore((window.score||0)+add); return }
+
+  // 2) 手动更新 DOM
+  const el = document.querySelector('#score, .score, .current-score')
+  if (el) el.textContent = String((parseInt(el.textContent||'0',10) || 0) + add)
+})
+
+/* === World 集成：支付成功→加分，分数持久化 === */
+;(function(){
+  const KEY='hextris:score'
+  const N = v => (Number.isFinite(+v)?+v:0)
+
+  if (typeof window.getScore!=='function') window.getScore = () => N(localStorage.getItem(KEY)||0)
+  if (typeof window.setScore!=='function') window.setScore = (n)=>{ localStorage.setItem(KEY,String(N(n))); render() }
+  if (typeof window.addScore!=='function') window.addScore = (n)=> window.setScore(window.getScore()+N(n))
+
+  function render(){
+    const val = window.getScore()
+    const el = document.querySelector('#score, .score, .current-score')
+    if (el) el.textContent = String(val)
+    if (typeof window.renderScore==='function' && window.renderScore!==render) { try{ window.renderScore(val) }catch{} }
+  }
+
+  document.addEventListener('world:paid',  e=> window.addScore(e.detail?.reward||0))
+  document.addEventListener('world:login', e=> {/* 需要时可用 e.detail.address */})
+  window.addEventListener('DOMContentLoaded', render)
+})()
