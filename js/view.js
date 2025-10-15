@@ -114,7 +114,7 @@ function showText(text) {
 
 	if (text == 'gameover') {
 	   //Clay('client.share.any', {text: 'Think you can beat my score of '+ score + ' in Super Cool Game?'})
-		$("#gameoverscreen").fadeIn();
+		$("#gameoverscreen").fadeIn(); if(window.saveScore){try{window.saveScore(window.playerAddr||'guest',(window.score||0))}catch(e){console.error(e)}}
     	}
 	$(".overlay").html(messages[text]);
 	$(".overlay").fadeIn("1000", "swing");
@@ -153,7 +153,7 @@ function gameOverDisplay() {
 	else {
 		$("#currentHighScore").text(highscores[0])
 	}
-	$("#gameoverscreen").fadeIn();
+	$("#gameoverscreen").fadeIn(); if(window.saveScore){try{window.saveScore(window.playerAddr||'guest',(window.score||0))}catch(e){console.error(e)}}
 	$("#buttonCont").fadeIn();
 	$("#container").fadeIn();
 	$("#socialShare").fadeIn();

@@ -1,38 +1,35 @@
 import { MiniKit } from 'https://cdn.skypack.dev/@worldcoin/minikit-js'
 const mk = new MiniKit()
+let playerAddr = null
 
-const $ = (s)=>document.querySelector(s)
-const btnLogin = ()=>$('#btnLogin')
-const btnPay   = ()=>$('#btnPay')
-const nameEl   = ()=>$('#playerName')
-const balEl    = ()=>$('#balance')
-
-function toast(msg){
-  let box=$('#toast'); if(!box){ box=document.createElement('div'); box.id='toast'; document.body.appendChild(box) }
-  box.textContent=msg; box.className='show'; setTimeout(()=>box.className='',1500)
-}
-function setLoading(el,on){ if(!el) return; el.disabled=on; on?el.setAttribute('data-loading',''):el.removeAttribute('data-loading') }
-
-window.worldLogin = async () => {
-  setLoading(btnLogin(), true)
+async function worldLogin() {
   try {
     const { finalPayload } = await mk.commands.walletAuth()
-    const addr = finalPayload?.address || 'user'
-    if (nameEl()) nameEl().textContent = addr.slice(0,6)+'…'+addr.slice(-4)
-    document.dispatchEvent(new CustomEvent('world:login',{detail:{address:addr}}))
-    toast('登录成功')
-  } catch(e){ console.error(e); toast('登录失败') }
-  finally{ setLoading(btnLogin(), false) }
+    playerAddr = finalPayload?.address || 'guest'
+    window.playerAddr = playerAddr
+    document.getElementById('btnLogin').textContent = '已登录'
+    document.getElementById('btnPay').disabled = false
+  } catch (e) { console.error(e); alert('登录失败') }
 }
 
-window.worldPay = async () => {
-  setLoading(btnPay(), true)
+async function worldPay() {
   try {
-    const res = await mk.commands.pay({ tokens:[{ symbol:'USDC', token_amount:'0.10' }] })
-    const reward = 50
-    document.dispatchEvent(new CustomEvent('world:paid',{detail:{reward,tx:res?.txHash}}))
-    if (typeof window.addScore==='function') window.addScore(reward)
-    toast('支付已发起')
-  } catch(e){ console.error(e); toast('支付取消/失败') }
-  finally{ setLoading(btnPay(), false) }
+    await mk.commands.pay({ tokens: [{ symbol: 'USDC', token_amount: '0.10' }] })
+    // 支付成功给奖励分数
+    const add = 50
+    if (typeof window.addScore === 'function') { window.addScore(add) }
+    else if (typeof window.updateScore === 'function') { window.updateScore((window.score||0)+add) }
+    else {
+      const el = document.querySelector('#score,.score,.current-score')
+      if (el) el.textContent = String((parseInt(el.textContent||'0',10)||0)+add)
+    }
+    // 将奖励分也写入 Supabase（若有当前分）
+    if (window.saveScore) {
+      const s = (window.score||0)
+      try { await window.saveScore(playerAddr||'guest', s) } catch(e){ console.error(e) }
+    }
+    alert('支付成功，已加分 +50')
+  } catch (e) { console.error(e); alert('支付取消/失败') }
 }
+window.worldLogin = worldLogin
+window.worldPay = worldPay
