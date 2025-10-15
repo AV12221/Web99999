@@ -22,3 +22,5 @@ window.addEventListener('world:paid', async ev=>{
     window.updateScore((window.score||0)+add)
   }
 })
+window.saveScore = saveScore;
+window.onGameOverScore = (s)=> saveScore(window.playerAddr || 'guest', s ?? (window.score||0) );
